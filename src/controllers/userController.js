@@ -1,3 +1,5 @@
+require('dotenv').config()
+const jsonwebtoken = require('jsonwebtoken')
 const { User: UserModel, User } = require('../models/User')
 const bcrypt = require('bcrypt')
 
@@ -22,13 +24,13 @@ const userController = {
 
       const newUser = new User(user)
       await newUser.save()
-      res.status(201).json({ response, message: 'User created successfully' })
+      res.status(201).json({ message: 'User created successfully' })
     } catch (error) {
       console.log(error.message)
       res.status(500).json({ message: 'Internal server error' })
     }
   },
-  signIn: async () => {
+  signIn: async (req, res) => {
     try {
       const doesUserExist = await UserModel.findOne({
         email: req.body.email,
@@ -46,6 +48,21 @@ const userController = {
       if (!isPasswordCorrect) {
         return res.status(401).json({ message: 'Invalid password' })
       }
+
+      const data = {
+        email: doesUserExist.email,
+        name: doesUserExist.name,
+      }
+
+      const jwt = jsonwebtoken.sign(
+        { id: doesUserExist._id },
+        process.env.PRIVATE_KEY,
+        { expiresIn: '60m' },
+      )
+
+      res
+        .status(200)
+        .json({ message: 'User logged in successfully', jwt, data })
     } catch (error) {
       console.log(error.message)
       res.status(500).json({ message: 'Internal server error' })

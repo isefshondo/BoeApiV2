@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 // TODO: Add a match for every value that needs a validation
-// TODO: Add the password field to the schema and discover its type
 
 const userSchema = new Schema({
   name: {
@@ -11,6 +10,10 @@ const userSchema = new Schema({
     required: true,
   },
   email: {
+    type: String,
+    required: true,
+  },
+  password: {
     type: String,
     required: true,
   },
