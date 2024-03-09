@@ -2,8 +2,6 @@ const mongoose = require('mongoose')
 
 const { Schema } = mongoose
 
-// TODO: Add a match for every value that needs a validation
-
 const userSchema = new Schema({
   name: {
     type: String,
@@ -12,10 +10,12 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
+    match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
   },
   password: {
     type: String,
     required: true,
+    match: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
   },
 })
 
