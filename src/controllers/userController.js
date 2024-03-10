@@ -32,17 +32,17 @@ const userController = {
   },
   signIn: async (req, res) => {
     try {
-      const doesUserExist = await UserModel.findOne({
+      const doesUserAlreadyExist = await UserModel.findOne({
         email: req.body.email,
       })
 
-      if (!doesUserExist) {
+      if (!doesUserAlreadyExist) {
         return res.status(404).json({ message: 'User not found' })
       }
 
       const isPasswordCorrect = await bcrypt.compare(
         req.body.password,
-        doesUserExist.password,
+        doesUserAlreadyExist.password,
       )
 
       if (!isPasswordCorrect) {
@@ -50,12 +50,12 @@ const userController = {
       }
 
       const data = {
-        email: doesUserExist.email,
-        name: doesUserExist.name,
+        email: doesUserAlreadyExist.email,
+        name: doesUserAlreadyExist.name,
       }
 
       const jwt = jsonwebtoken.sign(
-        { id: doesUserExist._id },
+        { id: doesUserAlreadyExist._id },
         process.env.PRIVATE_KEY,
         { expiresIn: '60m' },
       )
@@ -63,6 +63,47 @@ const userController = {
       res
         .status(200)
         .json({ message: 'User logged in successfully', jwt, data })
+    } catch (error) {
+      console.log(error.message)
+      res.status(500).json({ message: 'Internal server error' })
+    }
+  },
+  update: async (req, res) => {
+    try {
+      const userId = req.headers.userId
+      const doesUserAlreadyExist = await UserModel.findById(userId)
+      const receivedData = req.body
+
+      if (!doesUserAlreadyExist) {
+        return res.status(404).json({ message: 'User not found' })
+      }
+
+      const shouldUpdateName = receivedData.name !== doesUserAlreadyExist.name
+      const shouldUpdateEmail =
+        receivedData.email !== doesUserAlreadyExist.email
+      const shouldUpdatePassword =
+        receivedData.password !== process.env.DEFAULT_PASSWORD
+
+      const hashedPassword = await bcrypt.hash(receivedData.password, 10)
+
+      const executeUpdateData = [
+        { shouldUpdate: shouldUpdateName, data: { name: receivedData.name } },
+        {
+          shouldUpdate: shouldUpdateEmail,
+          data: { email: receivedData.email },
+        },
+        {
+          shouldUpdate: shouldUpdatePassword,
+          data: { password: hashedPassword },
+        },
+      ]
+
+      executeUpdateData.forEach(async (data) => {
+        if (data.shouldUpdate)
+          await UserModel.findByIdAndUpdate(userId, data.data)
+      })
+
+      res.status(200).json({ message: 'User updated successfully' })
     } catch (error) {
       console.log(error.message)
       res.status(500).json({ message: 'Internal server error' })
