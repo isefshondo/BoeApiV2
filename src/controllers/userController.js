@@ -109,6 +109,23 @@ const userController = {
       res.status(500).json({ message: 'Internal server error' })
     }
   },
+  delete: async (req, res) => {
+    try {
+      const userId = req.headers.userId
+      const doesUserAlreadyExist = await UserModel.findById(userId)
+
+      if (!doesUserAlreadyExist) {
+        return res.status(404).json({ message: 'User not found' })
+      }
+
+      await UserModel.findByIdAndDelete(userId)
+
+      res.status(200).json({ message: 'User deleted successfully' })
+    } catch (error) {
+      console.log(error.message)
+      res.status(500).json({ message: 'Internal server error' })
+    }
+  },
 }
 
 module.exports = userController
