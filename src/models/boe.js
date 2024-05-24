@@ -1,0 +1,1 @@
+//Passar as propriedades e o tipo dela, igual no user
