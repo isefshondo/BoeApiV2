@@ -6,10 +6,9 @@ const animalController = {
             
             const animal = {
                 id: req.body.id,
+                user_token: req.body.id,
                 name: req.body.name,
                 image: req.body.image,
-                disease_name: req.body.disease_name,
-                infection_level: req.body.infection_level,
             }
 
             const response = await AnimalModel.create(animal)

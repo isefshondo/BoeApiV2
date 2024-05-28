@@ -7,22 +7,18 @@ const animalSchema = new Schema({
         type: String,
         required: true,
     },
+    user_token: {
+        type: String,
+        required: true,
+    },
     name: {
         type: String,
         required: true,
     },
     image: {
-        type: String,
+        type: Buffer,
         required: false,
     },
-    disease_name: {
-        type: String,
-        requires: true,
-    },
-    infection_level: {
-        type: Number,
-        requires: true,
-    }
 
 })
 
