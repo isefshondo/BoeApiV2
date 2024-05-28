@@ -2,14 +2,14 @@ const router = require("express").Router()
 
 const animalController = require("../controllers/animalController");
 
-router
-    .route("/animal")
-    .post((req, res) => animalController.create(res, req))
+const animalRoutes = [
+    { method: 'post', path: '', controller: animalController.create },
+    { method: 'get', path: '', controller: animalController.getAll },
+    { method: 'get', path: '/:id', controller: animalController.get },
+]
 
-router.route("/animal").get((req, res) => animalController.getAll(req, res))
-
-router
-    .route("/animal/:id")
-    .get((req, res) => animalController.get(req, res))
+animalRoutes.forEach((route) => {
+    router[route.method](route.path, route.controller)
+  })
 
 module.exports = router;
