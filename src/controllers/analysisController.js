@@ -3,7 +3,7 @@ const { Analysis: AnalysisModel } = require("../models/Analysis");
 const analysisController = {
     create: async (req, res) => {
         try {
-            const { id, animal_id, created_at, result } = req.body;
+            const { id, animal_id, created_at } = req.body;
             const image = req.file ? req.file.filename : null;
 
             if (!image) {
