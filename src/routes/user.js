@@ -1,5 +1,6 @@
 const router = require('express').Router()
 
+const { tokenValidated } = require('../auth')
 const userController = require('../controllers/userController')
 
 const userPublicRoutes = [
@@ -14,6 +15,10 @@ const userPrivateRoutes = [
 
 userPublicRoutes.forEach((route) => {
   router[route.method](route.path, route.controller)
+})
+
+userPrivateRoutes.forEach((route) => {
+  router[route.method](route.path, tokenValidated, route.controller)
 })
 
 module.exports = router

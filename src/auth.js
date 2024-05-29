@@ -1,8 +1,8 @@
-import jsonwebtoken from 'jsonwebtoken'
+const jsonwebtoken = require('jsonwebtoken')
 
 require('dotenv').config()
 
-export function tokenValidated(request, response, next) {
+function tokenValidated(request, response, next) {
   const [, token] = request.headers.authorization.split(' ') || [' ', ' ']
 
   if (!token)
@@ -24,4 +24,8 @@ export function tokenValidated(request, response, next) {
     console.log(error.message)
     return response.status(500).json({ message: 'Invalid token' })
   }
+}
+
+module.exports = {
+  tokenValidated,
 }
