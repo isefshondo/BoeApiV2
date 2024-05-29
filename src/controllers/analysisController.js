@@ -1,36 +1,39 @@
 const { Analysis: AnalysisModel } = require("../models/Analysis");
+const fs = require('fs');
+const path = require('path');
+const FormData = require('form-data');
+const axios = require('axios');
 
 const analysisController = {
     create: async (req, res) => {
         try {
-            const { id, animal_id, created_at, result } = req.body;
+            const { id, animal_id, created_at } = req.body;
             const image = req.file ? req.file.filename : null;
 
             if (!image) {
                 return res.status(400).json({ msg: "Image is required." });
             }
 
-            // Enviar a imagem para a API da IA
+            // Criar o FormData corretamente no Node.js
             const formData = new FormData();
-            formData.append('image', req.file.buffer, req.file.originalname);
+            formData.append('analysis_img', fs.createReadStream(path.join(__dirname, '..', 'uploads', req.file.filename)));
 
-            const iaResponse = await axios.post('URL_DA_API_DA_IA', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            // Resposta para indicar que a imagem foi recebida (para debug)
+            // res.status(200).json({ message: "chegou a imagem" });
+
+            // Exemplo de como enviar para uma API de IA (descomentar e ajustar a URL da API)
+            // const iaResponse = await axios.post('URL_DA_API_DA_IA', formData, {
+            //     headers: formData.getHeaders()
+            // });
 
             // Supondo que a resposta da IA contenha "disease_class" e "accuracy"
-            const { disease_class, accuracy } = iaResponse.data;
+            // const { disease_class, accuracy } = iaResponse.data;
 
             const analysis = {
                 id,
                 animal_id,
                 created_at,
-                disease_class,
-                accuracy,
-                image,
-                result,
+                analysis_img: image,
             };
 
             const newAnalysis = new AnalysisModel(analysis);
@@ -41,28 +44,8 @@ const analysisController = {
             console.log(error);
             res.status(500).json({ error: "Internal server error." });
         }
-    },    
-    getAll: async (req, res) => {
-        try {
-            const analysis = await AnalysisModel.find()
-
-            res.json(analysis)
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ error: "Internal server error." })
-        }
     },
-    get: async (req, res) => {
-        try {
-            const id = req.params.id
-            const analysis = await AnalysisModel.findById(id)
+    // Outros métodos...
+};
 
-            res.json(analysis)
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ error: "Internal server error." })
-        }
-    }
-}
-
-module.exports = analysisController
+module.exports = analysisController;

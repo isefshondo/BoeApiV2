@@ -21,15 +21,12 @@ const analysisSchema = new Schema({
     },
     disease_class: {
         type: String,
-        required: true,
     },
     accuracy: {
         type: Number,
-        required: true,
     },
     result: {
         type: String,
-        required: true,
     },
 })
 
