@@ -1,15 +1,14 @@
 const router = require("express").Router()
+const upload = require("../middleware/upload")
 
 const analysisController = require("../controllers/analysisController");
 
-router
-    .route("/analysis")
-    .post((req, res) => analysisController.create(res, req))
+const analysisRoutes = [
+    { method: 'post', path: '', controller: analysisController.create },
+]
 
-router.route("/analysis").get((req, res) => analysisController.getAll(req, res))
-
-router
-    .route("/analysis/:id")
-    .get((req, res) => analysisController.get(req, res))
+analysisRoutes.forEach((route) => {
+    router[route.method](route.path, upload.single('analysis_img'), route.controller)
+  })
 
 module.exports = router;

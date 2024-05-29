@@ -11,17 +11,13 @@ const analysisSchema = new Schema({
         type: String,
         required: true,
     },
-    user_token: {
-        type: String,
-        required: true,
-    },
     analysis_img: {
         type: Buffer,
         required: true,
     },
-    analysis_date: {
+    created_at: {
         type: Date,
-        required: true,
+        default: Date.now
     },
     disease_class: {
         type: String,

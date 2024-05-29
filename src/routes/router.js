@@ -6,4 +6,7 @@ router.use('/user', userRouter)
 const animalRouter = require('./animal')
 router.use('/animal', animalRouter)
 
+const analysisRouter = require('./analysis')
+router.use('/analysis', analysisRouter)
+
 module.exports = router
