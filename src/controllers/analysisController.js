@@ -13,8 +13,10 @@ const analysisController = {
             }
             const image = req.file ? req.file.filename : null;
 
+            // chamada pra IA
+            // const {} =
 
-
+            await AnalysisModel.updateOne({cowId: animal_id, image })
 
             res.status(201).json({ response, msg: "Success!!! Animal created!!!" })
         } catch (error) {
