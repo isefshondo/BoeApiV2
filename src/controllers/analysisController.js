@@ -3,31 +3,49 @@ const { Analysis: AnalysisModel } = require("../models/Analysis");
 const analysisController = {
     create: async (req, res) => {
         try {
-
-            const analysis = {
-                id: req.body.id,
-                animal_id: req.body.animal_id,
-                created_at: req.body.created_at,
-                disease_class: req.body.disease_class,
-                accuracy: req.body.accuracy,
-            }
+            const { id, animal_id, created_at } = req.body;
             const image = req.file ? req.file.filename : null;
 
-            // chamada pra IA
-            // const {} =
+            if (!image) {
+                return res.status(400).json({ msg: "Image is required." });
+            }
 
-            await AnalysisModel.updateOne({cowId: animal_id, image })
+            // Enviar a imagem para a API da IA
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, req.file.originalname);
 
-            res.status(201).json({ response, msg: "Success!!! Animal created!!!" })
+            const iaResponse = await axios.post('URL_DA_API_DA_IA', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            // Supondo que a resposta da IA contenha "disease_class" e "accuracy"
+            const { disease_class, accuracy } = iaResponse.data;
+
+            const analysis = {
+                id,
+                animal_id,
+                created_at,
+                disease_class,
+                accuracy,
+                image,
+            };
+
+            const newAnalysis = new AnalysisModel(analysis);
+            await newAnalysis.save();
+
+            res.status(201).json({ analysis: newAnalysis, msg: "Success!!! Analysis created!!!" });
         } catch (error) {
-            console.loge(error)
+            console.log(error);
+            res.status(500).json({ error: "Internal server error." });
         }
-    },
+    },    
     getAll: async (req, res) => {
         try {
             const analysis = await AnalysisModel.find()
 
-            res.json(animals)
+            res.json(analysis)
         } catch (error) {
             console.log(error)
         }
