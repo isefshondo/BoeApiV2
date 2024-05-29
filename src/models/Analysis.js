@@ -25,7 +25,11 @@ const analysisSchema = new Schema({
     },
     accuracy: {
         type: Number,
-        required,
+        required: true,
+    },
+    result: {
+        type: String,
+        required: true,
     },
 })
 
