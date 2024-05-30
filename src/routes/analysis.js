@@ -1,13 +1,31 @@
 const router = require('express').Router();
+const fs = require('fs');
+const { tokenValidated } = require('../auth');
+const upload = require('../middleware/uploadMiddleware');
 
 const analysisController = require('../controllers/analysisController');
 
-const analysisRoutes = [
-  { method: 'post', path: '', controller: analysisController.create },
-];
+router.use((req, res, next) => {
+  const uploadDir = '../privates/uploads';
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+  next();
+});
 
-analysisRoutes.forEach((route) => {
-  router[route.method](route.path, route.controller);
+router.post(
+  '',
+  tokenValidated,
+  upload.single('analysis_img'),
+  analysisController.create,
+);
+
+router.use((req, res, next) => {
+  const uploadDir = '../privates/uploads';
+  if (fs.existsSync(uploadDir)) {
+    fs.rmdirSync(uploadDir, { recursive: true });
+  }
+  next();
 });
 
 module.exports = router;

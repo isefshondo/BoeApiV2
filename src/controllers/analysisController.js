@@ -1,47 +1,52 @@
-const { Analysis: AnalysisModel } = require("../models/Analysis");
+const { Analysis: AnalysisModel } = require('../models/Analysis');
 
 const analysisController = {
-    create: async (req, res) => {
-        try {
-            const { id, animal_id, created_at } = req.body;
-            const image = req.file ? req.file.filename : null;
+  create: async (req, res) => {
+    try {
+      const { animal_id } = req.body;
+      const image = req.file;
 
-            if (!image) {
-                return res.status(400).json({ msg: "Image is required." });
-            }
+      if (!image) {
+        return res.status(400).json({ message: 'Image is required.' });
+      }
 
-            // Enviar a imagem para a API da IA
-            const formData = new FormData();
-            formData.append('image', req.file.buffer, req.file.originalname);
+      console.log('Image received:', image);
 
-            const iaResponse = await axios.post('URL_DA_API_DA_IA', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+      // Send image to AI API
+      const formData = new FormData();
+      formData.append('image', req.file.buffer, req.file.originalname);
 
-            // Supondo que a resposta da IA contenha "disease_class" e "accuracy"
-            const { disease_class, accuracy } = iaResponse.data;
+      //   const aiResponse = await fetch('http://:5000', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data',
+      //     },
+      //     body: formData,
+      //   });
 
-            const analysis = {
-                id,
-                animal_id,
-                created_at,
-                disease_class,
-                accuracy,
-                image,
-                result,
-            };
+      //   const { accuracy, predicted_class, result } = await aiResponse.json();
 
-            const newAnalysis = new AnalysisModel(analysis);
-            await newAnalysis.save();
+      //   const analysis = {
+      //     animal_id,
+      //     created_at: new Date(),
+      //     disease_class: predicted_class,
+      //     accuracy,
+      //     analysis_img: req.file.buffer,
+      //     result: !result,
+      //     treatment_status: 'Sem tratamento',
+      //   };
 
-            res.status(201).json({ analysis: newAnalysis, msg: "Success!!! Analysis created!!!" });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ error: "Internal server error." });
-        }
-    },
-}
+      //   const newAnalysis = new AnalysisModel(analysis);
+      //   await newAnalysis.save();
 
-module.exports = analysisController
+      //   res
+      //     .status(201)
+      //     .json({ newAnalysis, message: 'Analysis done successfully.' });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Internal server error.' });
+    }
+  },
+};
+
+module.exports = analysisController;
