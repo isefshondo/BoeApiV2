@@ -1,36 +1,42 @@
-const { Animal: AnimalModel } = require("../models/Animal");
+const { Animal: AnimalModel, Animal } = require("../models/Animal");
 
 const animalController = {
     create: async(req, res) => {
         try {
-            console.log('CHEGUEI AQUI');
-            
+            const userId = req.headers.userId;
+            const {numberIdentification, name, image} = req.body;
             const animal = {
-                id: req.body.id,
-                user_token: req.body.user_token,
-                name: req.body.name,
-                image: req.body.image,
+                user_id: userId,
+                number_identification: numberIdentification,
+                name,
+                image,
+            };
+
+            const isAnimalAlreadyRegistered = await AnimalModel.findOne({number_identification: numberIdentification});
+
+            if (isAnimalAlreadyRegistered) {
+                return res.status(400).json({message: "This animal's number identification is already registered"});
             }
 
-            const doesAnimalAlreadyExist = await AnimalModel.findOne({
-                id: animal.id,
-            })
-            
-            if (doesAnimalAlreadyExist) {
-                return res
-                  .status(400)
-                  .json({ message: 'This animal is already registered' })
-            }
-
-            const response = await AnimalModel.create(animal)
-
-            res.status(201).json({ response, msg: "Success!!! Animal created!!!"})
+            const newAnimal = new Animal(animal);
+            await newAnimal.save();
+            res.status(201).json({message: "Cow created successfully", cowId: newAnimal['_id'], cowNumberIdentification: newAnimal['number_identification']});
         } catch(error) {
             console.log(error.message)
+            res.status(500).json({message: "Internal server error"});
         }
     },
     getAll: async(req, res) => {
         try {
+            let treatmentStatus, diseaseChancePercentage, disease;
+            const userId = req.headers.userId;
+            
+            const allRegisteredCows = await AnimalModel.find({user_id: userId});
+
+            for (let i = 0; i < allRegisteredCows.length; i++) {
+                
+            }
+
             const user_token = req.header.user_token
             const animals = await AnimalModel.find(user_token)
 

@@ -4,15 +4,15 @@ const {Analysis: AnalysisModel} = require('../models/Analysis');
 const analyticsController = {
     getAnalytics: async (req, res) => {
         try {
-            let positiveCases, negativeCases;
+            let positiveCases = 0, negativeCases = 0;
             const userId = req.headers.userId;
 
             const allRegisteredAnimals = await AnimalModel.find({user_id: userId});
 
             for (let i = 0; i < allRegisteredAnimals.length; i++) {
                 const getCowAnalysis = await AnalysisModel.find({animal_id: allRegisteredAnimals[i]['_id']});
-                positiveCases = getCowAnalysis.filter((data) => data.result === true);
-                negativeCases = getCowAnalysis.filter((data) => data.result === false);
+                positiveCases = getCowAnalysis.filter((data) => data.result === true).length + positiveCases;
+                negativeCases = getCowAnalysis.filter((data) => data.result === false).length + negativeCases;
             }
 
             const currentPositiveCasesPercentage = (positiveCases / allRegisteredAnimals) * 100;

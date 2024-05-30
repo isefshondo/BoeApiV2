@@ -3,11 +3,11 @@ const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const animalSchema = new Schema({
-    id: {
+    number_identification: {
         type: String,
         required: true,
     },
-    user_token: {
+    user_id: {
         type: String,
         required: true,
     },

@@ -31,6 +31,10 @@ const analysisSchema = new Schema({
         type: String,
         required: true,
     },
+    treatment_status: {
+        type: String,
+        required: true,
+    },
 })
 
 const Analysis = mongoose.model('Analysis', analysisSchema)

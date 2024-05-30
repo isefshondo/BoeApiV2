@@ -41,28 +41,7 @@ const analysisController = {
             console.log(error);
             res.status(500).json({ error: "Internal server error." });
         }
-    },    
-    getAll: async (req, res) => {
-        try {
-            const analysis = await AnalysisModel.find()
-
-            res.json(analysis)
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ error: "Internal server error." })
-        }
     },
-    get: async (req, res) => {
-        try {
-            const id = req.params.id
-            const analysis = await AnalysisModel.findById(id)
-
-            res.json(analysis)
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({ error: "Internal server error." })
-        }
-    }
 }
 
 module.exports = analysisController
