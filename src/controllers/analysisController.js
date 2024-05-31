@@ -54,7 +54,8 @@ const analysisController = {
         .status(201)
         .json({ newAnalysis, message: 'Analysis done successfully.' });
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
+      res.statusMessage = error.message;
       res.status(500).json({ error: 'Internal server error.' });
     }
   },

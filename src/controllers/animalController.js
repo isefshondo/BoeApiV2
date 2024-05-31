@@ -32,6 +32,7 @@ const animalController = {
       });
     } catch (error) {
       console.log(error.message);
+      res.statusText = error.message;
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -63,6 +64,7 @@ const animalController = {
       res.status(200).json(allRegisteredCows);
     } catch (error) {
       console.log(error);
+      res.statusText = error.message;
       res.status(500).json({ message: 'Internal server error' });
     }
   },
@@ -86,7 +88,9 @@ const animalController = {
 
       res.status(200).json({ animal, analysisHistoric });
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
+      res.statusText = error.message;
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 };

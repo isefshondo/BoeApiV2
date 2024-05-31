@@ -35,6 +35,7 @@ const analyticsController = {
       });
     } catch (error) {
       console.log(error.message);
+      res.statusMessage = error.message;
       res.status(500).json({ message: 'Internal server error' });
     }
   },
