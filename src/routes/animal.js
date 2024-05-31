@@ -1,4 +1,5 @@
 const router = require("express").Router()
+const { tokenValidated } = require('../auth');
 
 const animalController = require("../controllers/animalController");
 
@@ -9,7 +10,7 @@ const animalRoutes = [
 ]
 
 animalRoutes.forEach((route) => {
-    router[route.method](route.path, route.controller)
+    router[route.method](route.path, tokenValidated, route.controller)
   })
 
 module.exports = router;

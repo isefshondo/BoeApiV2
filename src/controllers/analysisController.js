@@ -3,14 +3,13 @@ const { Analysis: AnalysisModel } = require('../models/Analysis');
 const analysisController = {
   create: async (req, res) => {
     try {
-      const { animal_id } = req.body;
-      const image = req.file;
+      const { animal_id, analysis_img } = req.body;
 
-      if (!image) {
+      if (!analysis_img) {
         return res.status(400).json({ message: 'Image is required.' });
       }
 
-      console.log('Image received:', image);
+      console.log('Image received:', analysis_img);
 
       // Send image to AI API
       const formData = new FormData();
