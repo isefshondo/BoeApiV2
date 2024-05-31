@@ -15,10 +15,10 @@ const analyticsController = {
           animal_id: allRegisteredAnimals[i]['_id'],
         });
         positiveCases =
-          getCowAnalysis.filter((data) => data.result === true).length +
+          getCowAnalysis.filter((data) => data.result === 'positivo').length +
           positiveCases;
         negativeCases =
-          getCowAnalysis.filter((data) => data.result === false).length +
+          getCowAnalysis.filter((data) => data.result === 'negativo').length +
           negativeCases;
       }
 
@@ -27,7 +27,9 @@ const analyticsController = {
 
       res.status(200).json({
         registered_animals: allRegisteredAnimals.length,
-        current_positive_cases_percentage: currentPositiveCasesPercentage,
+        current_positive_cases_percentage: Math.round(
+          currentPositiveCasesPercentage,
+        ),
         current_positive_cases: positiveCases,
         current_negative_cases: negativeCases,
       });
