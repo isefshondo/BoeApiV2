@@ -1,36 +1,30 @@
 const router = require('express').Router();
-const fs = require('fs').promises;
-const path = require('path');
 const { tokenValidated } = require('../auth');
-const upload = require('../middleware/uploadMiddleware');
+const multer = require('multer');
+const fs = require('fs-extra');
+const path = require('path');
+
 const analysisController = require('../controllers/analysisController');
 
-// router.use(async (req, res, next) => {
-//   try {
-//     const uploadDir = path.join(__dirname, '../privates/uploads');
-//     await fs.mkdir(uploadDir, { recursive: true });
-//     next();
-//   } catch (error) {
-//     console.log(error);
-//     // next(error);
-//   }
-// });
+const UPLOADS_DIR = path.join(__dirname, '../privates/uploads');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    fs.ensureDirSync(UPLOADS_DIR);
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const multerUpload = multer({ storage });
 
 router.post(
   '',
   tokenValidated,
-  upload.single('analysis_img'),
+  multerUpload.single('analysis_img'),
   analysisController.create,
 );
-
-// router.use(async (req, res, next) => {
-//   try {
-//     const uploadDir = path.join(__dirname, '../privates/uploads');
-//     await fs.rmdir(uploadDir, { recursive: true });
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 module.exports = router;

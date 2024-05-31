@@ -1,15 +1,25 @@
 const { Analysis: AnalysisModel } = require('../models/Analysis');
+const path = require('path');
+const fs = require('fs-extra');
 
 const analysisController = {
   create: async (req, res) => {
+    console.log({ file: req.file, body: req.body });
+    const UPLOADS_DIR = path.join(__dirname, '../privates/uploads');
+    const targetDir = path.join(UPLOADS_DIR, req.file.filename);
+
     try {
-      const { animal_id, analysis_img } = req.body;
+      await fs.ensureDir(UPLOADS_DIR);
+
+      const { animal_id } = req.body;
+      const analysis_img = req.file;
+
+      console.log('Animal ID:', animal_id);
+      console.log('Image received:', analysis_img);
 
       if (!analysis_img) {
         return res.status(400).json({ message: 'Image is required.' });
       }
-
-      console.log('Image received:', analysis_img);
 
       // Send image to AI API
       const formData = new FormData();
