@@ -1,5 +1,5 @@
 const { Animal: AnimalModel, Animal } = require('../models/Animal');
-const { Analysis: AnalysisModel, Analysis } = require('../models/Analysis');
+const { Analysis: AnalysisModel } = require('../models/Analysis');
 
 const animalController = {
   create: async (req, res) => {
@@ -60,7 +60,7 @@ const animalController = {
         });
       }
 
-      res.json(200).json(allRegisteredCows);
+      res.status(200).json(allRegisteredCows);
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: 'Internal server error' });
@@ -69,14 +69,22 @@ const animalController = {
   get: async (req, res) => {
     try {
       const id = req.params.id;
-      const user_token = req.header.user_token;
+      const userId = req.headers.userId;
 
       const animal = await AnimalModel.findOne({
-        id: id,
-        userToken: user_token,
+        _id: id,
+        user_id: userId,
       });
 
-      res.json(animal);
+      if (!animal) {
+        return res.status(404).json({ message: 'Animal not found' });
+      }
+
+      const analysisHistoric = await AnalysisModel.find({
+        animal_id: animal._id,
+      });
+
+      res.status(200).json({ animal, analysisHistoric });
     } catch (error) {
       console.log(error);
     }
