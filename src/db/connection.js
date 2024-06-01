@@ -5,7 +5,7 @@ async function main() {
   try {
     mongoose.set('strictQuery', true)
     await mongoose.connect(
-      `mongodb+srv://OberonsTeam:${process.env.DB_PASSWORD}@boeapiv2cluster.sh14dnv.mongodb.net/?retryWrites=true&w=majority&appName=BoeApiV2Cluster`,
+      `mongodb+srv://rebecabaruchg:xgpERoWoBmKZZruG@boecluster.ekfb0gh.mongodb.net/?retryWrites=true&w=majority&appName=boeCluster`,
     )
     console.log('Connected to the database')
   } catch (error) {

@@ -1,6 +1,15 @@
-const router = require('express').Router()
+const router = require('express').Router();
 
-const userRouter = require('./user')
-router.use('/user', userRouter)
+const userRouter = require('./user');
+router.use('/user', userRouter);
 
-module.exports = router
+const animalRouter = require('./animal');
+router.use('/animal', animalRouter);
+
+const analysisRouter = require('./analysis');
+router.use('/analysis', analysisRouter);
+
+const analyticsRouter = require('./analytics');
+router.use('/analytics', analyticsRouter);
+
+module.exports = router;
