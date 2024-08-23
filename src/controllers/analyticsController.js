@@ -39,6 +39,31 @@ const analyticsController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  getAnalyticsGraphics: async (req, res) => {
+    try {
+      const { most_recent_date, earliest_date } = req.body;
+      const initialDate = new Date(earliest_date);
+      const endDate = new Date(most_recent_date);
+      const userId = req.headers.userId;
+
+      const allRegisteredAnimalsByUser = await AnimalModel.find({ user_id: userId });
+      const animalIdsByUser = allRegisteredAnimalsByUser.map(animal => animal._id);
+      const allAnalysisRegisteredByPeriod = await AnalysisModel.find({animal_id: animalIdsByUser, created_at: {$gte: initialDate, $lte: endDate}});
+
+      const filterPositiveCases = allAnalysisRegisteredByPeriod.filter((data) => data.result === 'positivo');
+      const filterNegativeCases = allAnalysisRegisteredByPeriod.filter((data) => data.result === 'negativo');
+
+      res.status(200).json({
+        graphics: {
+          positive: filterPositiveCases,
+          negative: filterNegativeCases,
+        }
+      })
+    } catch (error) { 
+      res.status(500);
+      res.statusMessage = error.message;
+    }
+  }
 };
 
 module.exports = analyticsController;
