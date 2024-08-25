@@ -18,7 +18,6 @@ const analysisController = {
         return res.status(400).json({ message: 'Image is required.' });
       }
 
-      // Send image to AI API
       const formData = new FormData();
       formData.append(
         'file',
