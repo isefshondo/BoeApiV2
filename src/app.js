@@ -15,6 +15,6 @@ app.use('/api', routes);
 
 const HOST = '0.0.0.0';
 
-app.listen(3000, HOST, () => {
-  console.log(`BOE API is running at: http://${HOST}:3000`);
+app.listen(4000, HOST, () => {
+  console.log(`BOE API is running at: http://${HOST}:4000`);
 });
