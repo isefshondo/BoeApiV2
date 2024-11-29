@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const farmSchema = new Schema({
   name: {
@@ -10,11 +10,11 @@ const farmSchema = new Schema({
     type: String,
     required: true,
   },
-  taxId: {
+  tax_id: {
     type: String,
     required: true,
   },
-  zipCode: {
+  zip_code: {
     type: String,
     required: true,
   },
@@ -34,10 +34,12 @@ const farmSchema = new Schema({
     type: String,
     required: true,
   },
-  employees: [{
-    type: String,
-    required: true,
-  }],
+  employees: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
 });
 
 const Farm = mongoose.model('Farm', farmSchema);
@@ -45,4 +47,4 @@ const Farm = mongoose.model('Farm', farmSchema);
 module.exports = {
   Farm,
   farmSchema,
-}
+};
