@@ -41,7 +41,7 @@ const analyticsController = {
       const { earliest_date, most_recent_date } = req.body;
       const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
       const allRegisteredAnimalsIds = allRegisteredAnimals.map(
-        (animal) => animal._id,
+        (animal) => animal._id.toString(),
       );
       const allAnalysis = await AnalysisModel.find({
         animal_id: { $in: allRegisteredAnimalsIds },
@@ -67,10 +67,22 @@ const analyticsController = {
         },
         {},
       );
-      return Object.entries(groupAnalysisByDate).map(([date, analysis]) => ({
-        date,
-        ...analysis,
-      }));
+      const labels = Object.keys(groupAnalysisByDate);
+      const positiveData = labels.map((date) => groupAnalysisByDate[date].positive);
+      const negativeData = labels.map((date) => groupAnalysisByDate[date].negative);
+      const chartData = {
+        labels,
+        datasets: [{
+          data: positiveData,
+          color: () => 'rgba(75, 192, 192, .8)',
+          labels: 'Positivos',
+        }, {
+          data: negativeData,
+          color: () => 'rgba(255, 99, 132, .8)',
+          labels: 'Negativos',
+        }],
+      };
+      res.status(200).json(chartData);
     } catch (error) {
       res.status(500);
       res.statusMessage = error.message;
