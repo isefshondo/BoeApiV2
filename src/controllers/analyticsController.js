@@ -37,6 +37,7 @@ const analyticsController = {
   },
   getAnalyticsGraphics: async (req, res) => {
     try {
+      const diseaseLabels = ['Berne', 'Dermatite Nodular'];
       const userId = req.headers.userId;
       const { earliest_date, most_recent_date } = req.body;
       const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
@@ -48,7 +49,7 @@ const analyticsController = {
       });
       const filterAnalysisByPeriod = allAnalysis.filter(
         (analysis) =>
-          analysis.date >= earliest_date && analysis.date <= most_recent_date,
+          analysis.created_at >= new Date(earliest_date) && analysis.created_at <= new Date(most_recent_date),
       );
       const groupAnalysisByDate = filterAnalysisByPeriod.reduce(
         (acc, analysis) => {
@@ -58,9 +59,9 @@ const analyticsController = {
           if (!acc[formatDateToISO]) {
             acc[formatDateToISO] = { positive: 0, negative: 0 };
           }
-          if (analysis.result === 'positivo') {
+          if (diseaseLabels.includes(analysis.disease_class)) {
             acc[formatDateToISO].positive += 1;
-          } else if (analysis.result === 'negativo') {
+          } else if (analysis.disease_class === 'Saudável') {
             acc[formatDateToISO].negative += 1;
           }
           return acc;
@@ -74,11 +75,11 @@ const analyticsController = {
         labels,
         datasets: [{
           data: positiveData,
-          color: () => 'rgba(75, 192, 192, .8)',
+          color: 'rgba(75, 192, 192, .8)',
           labels: 'Positivos',
         }, {
           data: negativeData,
-          color: () => 'rgba(255, 99, 132, .8)',
+          color: 'rgba(255, 99, 132, .8)',
           labels: 'Negativos',
         }],
       };
