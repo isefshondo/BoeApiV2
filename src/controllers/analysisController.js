@@ -32,15 +32,15 @@ const analysisController = {
         body: formData,
       });
 
-      const { accuracy, predicted_class, result } = await aiResponse.json();
+      const { confidence, predicted_class } = await aiResponse.json();
+      const formattedConfidence = Number(confidence.replace('%', ''));
 
       const analysis = {
         animal_id,
         created_at: new Date(),
         disease_class: predicted_class,
-        accuracy,
+        accuracy: formattedConfidence,
         analysis_img: fs.readFileSync(targetDir),
-        result,
         treatment_status: 'Sem tratamento',
       };
 

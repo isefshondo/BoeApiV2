@@ -23,10 +23,6 @@ const analysisSchema = new Schema({
     type: Number,
     required: true,
   },
-  result: {
-    type: String,
-    required: true,
-  },
   treatment_status: {
     type: String,
     required: true,
