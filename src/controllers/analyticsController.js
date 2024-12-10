@@ -40,49 +40,59 @@ const analyticsController = {
       const diseaseLabels = ['Berne', 'Dermatite Nodular'];
       const userId = req.headers.userId;
       const { earliest_date, most_recent_date } = req.body;
-      const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
-      const allRegisteredAnimalsIds = allRegisteredAnimals.map(
-        (animal) => animal._id.toString(),
-      );
-      const allAnalysis = await AnalysisModel.find({
-        animal_id: { $in: allRegisteredAnimalsIds },
-      });
-      const filterAnalysisByPeriod = allAnalysis.filter(
-        (analysis) =>
-          analysis.created_at >= new Date(earliest_date) && analysis.created_at <= new Date(most_recent_date),
-      );
-      const groupAnalysisByDate = filterAnalysisByPeriod.reduce(
-        (acc, analysis) => {
-          const formatDateToISO = analysis.created_at
-            .toISOString()
-            .split('T')[0];
-          if (!acc[formatDateToISO]) {
-            acc[formatDateToISO] = { positive: 0, negative: 0 };
-          }
-          if (diseaseLabels.includes(analysis.disease_class)) {
-            acc[formatDateToISO].positive += 1;
-          } else if (analysis.disease_class === 'Saudável') {
-            acc[formatDateToISO].negative += 1;
-          }
-          return acc;
+
+      const allAnalysis = await AnalysisModel.aggregate([
+        {
+          $match: {
+            user_id: userId,
+            created_at: {
+              $gte: new Date(earliest_date),
+              $lte: new Date(most_recent_date),
+            },
+          },
         },
-        {},
-      );
-      const labels = Object.keys(groupAnalysisByDate);
-      const positiveData = labels.map((date) => groupAnalysisByDate[date].positive);
-      const negativeData = labels.map((date) => groupAnalysisByDate[date].negative);
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m-%d', date: '$created_at' },
+            },
+            positive: {
+              $sum: {
+                $cond: [{ $in: ['$disease_class', diseaseLabels] }, 1, 0],
+              },
+            },
+            negative: {
+              $sum: {
+                $cond: [{ $eq: ['$disease_class', 'Saudável'] }, 1, 0],
+              },
+            },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      const labels = allAnalysis.map((item) => item._id);
+      const positiveData = allAnalysis.map((item) => item.positive);
+      const negativeData = allAnalysis.map((item) => item.negative);
+
       const chartData = {
         labels,
-        datasets: [{
-          data: positiveData,
-          color: 'rgba(75, 192, 192, .8)',
-          labels: 'Positivos',
-        }, {
-          data: negativeData,
-          color: 'rgba(255, 99, 132, .8)',
-          labels: 'Negativos',
-        }],
+        datasets: [
+          {
+            data: positiveData,
+            color: 'rgba(75, 192, 192, .8)',
+            labels: 'Positivos',
+          },
+          {
+            data: negativeData,
+            color: 'rgba(255, 99, 132, .8)',
+            labels: 'Negativos',
+          },
+        ],
       };
+
       res.status(200).json(chartData);
     } catch (error) {
       res.status(500);
