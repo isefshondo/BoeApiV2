@@ -12,6 +12,7 @@ const userController = {
         email: req.body.email,
         phone: req.body.phone,
         password: hashedPassword,
+        signUpDate: new Date(),
       };
 
       const doesUserAlreadyExist = await UserModel.findOne({

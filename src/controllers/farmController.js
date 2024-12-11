@@ -1,13 +1,14 @@
-const { Farm: FarmModel, Farm } = require('../models/Farm');
+const mongoose = require('mongoose');
+const { Farm: FarmModel } = require('../models/Farm');
+const { User: UserModel, User } = require('../models/User');
 
 const farmController = {
   create: async (req, res) => {
     try {
       const userId = req.headers.userId;
-      const { name, phone, tax_id, zip_code, state, city, address, employees } =
-        req.body;
+      const { name, phone, tax_id, zip_code, state, city, address } = req.body;
       const farm = {
-        owner_id: userId,
+        owner_id: mongoose.Types.ObjectId(userId),
         name,
         phone,
         tax_id,
@@ -15,7 +16,7 @@ const farmController = {
         state,
         city,
         address,
-        employees,
+        employees: [],
       };
 
       const isFarmAlreadyRegistered = await FarmModel.findOne({
@@ -38,4 +39,29 @@ const farmController = {
       res.status(500).json({ message: 'Internal server error' });
     }
   },
+  getAllEmployees: async (req, res) => {
+    try {
+      const userId = req.headers.userId;
+      const farm = await FarmModel.findOne({
+        owner_id: mongoose.Types.ObjectId(userId),
+      }).lean();
+      const employees = await User.find({ farm_id: farm._id }).lean();
+      const buildFarmEmployeesResDto = await Promise.all(
+        employees.map(async (employee) => {
+          const analysisCount = await Analysis.countDocuments({
+            created_by: employee._id,
+          });
+          return {
+            ...employee,
+            analysisCount,
+          };
+        }),
+      );
+      res.status(200).json(buildFarmEmployeesResDto);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
 };
+
+module.exports = farmController;

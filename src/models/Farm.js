@@ -31,13 +31,14 @@ const farmSchema = new Schema({
     required: true,
   },
   owner_id: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   employees: [
     {
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
   ],
 });

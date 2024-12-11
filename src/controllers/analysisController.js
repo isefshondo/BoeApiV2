@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { Analysis: AnalysisModel } = require('../models/Analysis');
 const path = require('path');
 const fs = require('fs-extra');
@@ -42,6 +43,7 @@ const analysisController = {
         accuracy: formattedConfidence,
         analysis_img: fs.readFileSync(targetDir),
         treatment_status: 'Sem tratamento',
+        created_by: mongoose.Types.ObjectId(req.headers.userId),
       };
 
       const newAnalysis = new AnalysisModel(analysis);

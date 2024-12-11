@@ -27,6 +27,11 @@ const analysisSchema = new Schema({
     type: String,
     required: true,
   },
+  created_by: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 });
 
 const Analysis = mongoose.model('Analysis', analysisSchema);
