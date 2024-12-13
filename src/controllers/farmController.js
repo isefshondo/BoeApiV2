@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Farm: FarmModel } = require('../models/Farm');
+const { Farm: FarmModel, Farm } = require('../models/Farm');
 const { User: UserModel, User } = require('../models/User');
 
 const farmController = {
@@ -8,7 +8,7 @@ const farmController = {
       const userId = req.headers.userId;
       const { name, phone, tax_id, zip_code, state, city, address } = req.body;
       const farm = {
-        owner_id: mongoose.Types.ObjectId(userId),
+        owner_id: userId,
         name,
         phone,
         tax_id,
@@ -29,6 +29,7 @@ const farmController = {
         });
       }
 
+      console.log(req.body, "cheguei na rota de cadastro da fazenda");
       const newFarm = new Farm(farm);
       await newFarm.save();
       res.status(201).json({

@@ -12,7 +12,7 @@ router.use('/analysis', analysisRouter);
 const analyticsRouter = require('./analytics');
 router.use('/analytics', analyticsRouter);
 
-// const farmRouter = require('./farm');
-// router.use('/farm', farmRouter);
+const farmRouter = require('./farm');
+router.use('/farm', farmRouter);
 
 module.exports = router;
