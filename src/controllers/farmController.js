@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const { Farm: FarmModel, Farm } = require('../models/Farm');
 const { User: UserModel, User } = require('../models/User');
+const { Analysis } = require('../models/Analysis');
+const { formatDate } = require('../utils/format-date.util');
 
 const farmController = {
   create: async (req, res) => {
@@ -29,7 +31,7 @@ const farmController = {
         });
       }
 
-      console.log(req.body, "cheguei na rota de cadastro da fazenda");
+      console.log(req.body, 'cheguei na rota de cadastro da fazenda');
       const newFarm = new Farm(farm);
       await newFarm.save();
       res.status(201).json({
@@ -43,18 +45,23 @@ const farmController = {
   getAllEmployees: async (req, res) => {
     try {
       const userId = req.headers.userId;
-      const farm = await FarmModel.findOne({
-        owner_id: mongoose.Types.ObjectId(userId),
-      }).lean();
-      const employees = await User.find({ farm_id: farm._id }).lean();
+      const userFarm = await FarmModel.findOne({ owner_id: userId });
+      const allFarmEmployees = await UserModel.find({
+        farm_id: userFarm._id.toString(),
+      });
       const buildFarmEmployeesResDto = await Promise.all(
-        employees.map(async (employee) => {
-          const analysisCount = await Analysis.countDocuments({
-            created_by: employee._id,
+        allFarmEmployees.map(async (employee) => {
+          const numberOfAnalysisByEmployee = await Analysis.countDocuments({
+            created_by: employee._id.toString(),
           });
           return {
-            ...employee,
-            analysisCount,
+            id: employee._id.toString(),
+            picture: undefined,
+            name: employee.name,
+            email: employee.email,
+            registers: numberOfAnalysisByEmployee.toString(),
+            date: formatDate(employee.signUpDate),
+            action: 'Deletar',
           };
         }),
       );
