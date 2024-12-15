@@ -12,6 +12,7 @@ const userController = {
         email: req.body.email,
         phone: req.body.phone,
         password: hashedPassword,
+        signUpDate: new Date(),
       };
 
       const doesUserAlreadyExist = await UserModel.findOne({
@@ -34,6 +35,10 @@ const userController = {
   },
   signIn: async (req, res) => {
     try {
+      if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
+      }
+      
       const doesUserAlreadyExist = await UserModel.findOne({
         email: req.body.email,
       });

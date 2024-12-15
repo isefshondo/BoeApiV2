@@ -1,21 +1,24 @@
 const { Animal: AnimalModel } = require('../models/Animal');
 const { Analysis: AnalysisModel } = require('../models/Analysis');
+const { User: UserModel, User } = require('../models/User');
+const { Farm: FarmModel } = require('../models/Farm');
 
 const analyticsController = {
   getAnalytics: async (req, res) => {
     try {
+      const diseaseLabels = ['Berne', 'Dermatite Nodular'];
       const userId = req.headers.userId;
 
       const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
 
       const positiveCases = await AnalysisModel.countDocuments({
         animal_id: { $in: allRegisteredAnimals.map((animal) => animal._id) },
-        result: 'positivo',
+        disease_class: { $in: diseaseLabels },
       });
 
       const negativeCases = await AnalysisModel.countDocuments({
         animal_id: { $in: allRegisteredAnimals.map((animal) => animal._id) },
-        result: 'negativo',
+        result: { $in: ['Saudável'] },
       });
 
       const currentPositiveCasesPercentage =
@@ -41,15 +44,16 @@ const analyticsController = {
       const userId = req.headers.userId;
       const { earliest_date, most_recent_date } = req.body;
       const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
-      const allRegisteredAnimalsIds = allRegisteredAnimals.map(
-        (animal) => animal._id.toString(),
+      const allRegisteredAnimalsIds = allRegisteredAnimals.map((animal) =>
+        animal._id.toString(),
       );
       const allAnalysis = await AnalysisModel.find({
         animal_id: { $in: allRegisteredAnimalsIds },
       });
       const filterAnalysisByPeriod = allAnalysis.filter(
         (analysis) =>
-          analysis.created_at >= new Date(earliest_date) && analysis.created_at <= new Date(most_recent_date),
+          analysis.created_at >= new Date(earliest_date) &&
+          analysis.created_at <= new Date(most_recent_date),
       );
       const groupAnalysisByDate = filterAnalysisByPeriod.reduce(
         (acc, analysis) => {
@@ -69,24 +73,62 @@ const analyticsController = {
         {},
       );
       const labels = Object.keys(groupAnalysisByDate);
-      const positiveData = labels.map((date) => groupAnalysisByDate[date].positive);
-      const negativeData = labels.map((date) => groupAnalysisByDate[date].negative);
+      const positiveData = labels.map(
+        (date) => groupAnalysisByDate[date].positive,
+      );
+      const negativeData = labels.map(
+        (date) => groupAnalysisByDate[date].negative,
+      );
       const chartData = {
         labels,
-        datasets: [{
-          data: positiveData,
-          color: 'rgba(75, 192, 192, .8)',
-          labels: 'Positivos',
-        }, {
-          data: negativeData,
-          color: 'rgba(255, 99, 132, .8)',
-          labels: 'Negativos',
-        }],
+        datasets: [
+          {
+            data: positiveData,
+            color: 'rgba(75, 192, 192, .8)',
+            labels: 'Positivos',
+          },
+          {
+            data: negativeData,
+            color: 'rgba(255, 99, 132, .8)',
+            labels: 'Negativos',
+          },
+        ],
       };
       res.status(200).json(chartData);
     } catch (error) {
       res.status(500);
       res.statusMessage = error.message;
+    }
+  },
+  getDetailedAnalytics: async (req, res) => {
+    try {
+      const userId = req.headers.userId;
+      const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
+      const groupMostRecentAnalysisByAnimal = await Promise.all(
+        allRegisteredAnimals.map(async (animal) => {
+          const mostRecentAnalysis = await AnalysisModel.findOne({
+            animal_id: animal._id,
+          }).sort({ created_at: -1 });
+          return mostRecentAnalysis;
+        }),
+      );
+      const buildDetailedAnalyticsResDto = await Promise.all(
+        groupMostRecentAnalysisByAnimal.map(async (analysis) => {
+          const animal = await AnimalModel.findById(analysis.animal_id);
+          const user = await UserModel.findById(animal.user_id);
+          return {
+            animal_number_identification: animal.number_identification,
+            user_name: user.name,
+            analysis_date: analysis.created_at,
+            disease_class: analysis.disease_class,
+            accuracy: analysis.accuracy,
+            treatment_status: analysis.treatment_status,
+          };
+        }),
+      );
+      res.status(200).json(buildDetailedAnalyticsResDto);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
     }
   },
 };

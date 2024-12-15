@@ -36,8 +36,8 @@ const farmSchema = new Schema({
   },
   employees: [
     {
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
   ],
 });
