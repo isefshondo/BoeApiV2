@@ -44,8 +44,9 @@ const farmController = {
     try {
       const userId = req.headers.userId;
       const farm = await FarmModel.findOne({
-        owner_id: mongoose.Types.ObjectId(userId),
+        owner_id: userId
       }).lean();
+      console.log(farm);
       const employees = await User.find({ farm_id: farm._id }).lean();
       const buildFarmEmployeesResDto = await Promise.all(
         employees.map(async (employee) => {
