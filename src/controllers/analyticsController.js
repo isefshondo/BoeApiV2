@@ -100,37 +100,6 @@ const analyticsController = {
       res.statusMessage = error.message;
     }
   },
-  getDetailedAnalytics: async (req, res) => {
-    try {
-      const userId = req.headers.userId;
-      const allRegisteredAnimals = await AnimalModel.find({ user_id: userId });
-      const groupMostRecentAnalysisByAnimal = await Promise.all(
-        allRegisteredAnimals.map(async (animal) => {
-          const mostRecentAnalysis = await AnalysisModel.findOne({
-            animal_id: animal._id,
-          }).sort({ created_at: -1 });
-          return mostRecentAnalysis;
-        }),
-      );
-      const buildDetailedAnalyticsResDto = await Promise.all(
-        groupMostRecentAnalysisByAnimal.map(async (analysis) => {
-          const animal = await AnimalModel.findById(analysis.animal_id);
-          const user = await UserModel.findById(animal.user_id);
-          return {
-            animal_number_identification: animal.number_identification,
-            user_name: user.name,
-            analysis_date: analysis.created_at,
-            disease_class: analysis.disease_class,
-            accuracy: analysis.accuracy,
-            treatment_status: analysis.treatment_status,
-          };
-        }),
-      );
-      res.status(200).json(buildDetailedAnalyticsResDto);
-    } catch (error) {
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  },
 };
 
 module.exports = analyticsController;

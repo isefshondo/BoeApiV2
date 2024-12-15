@@ -21,8 +21,7 @@ const userSchema = new Schema({
     required: false,
   },
   farm_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Farm',
+    type: String,
     required: false,
   },
   signUpDate: {

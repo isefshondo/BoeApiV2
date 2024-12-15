@@ -26,7 +26,13 @@ const userController = {
 
       const newUser = new User(user);
       await newUser.save();
-      res.status(201).json({ message: 'User created successfully' });
+
+      const jwt = jsonwebtoken.sign(
+        { id: newUser._id },
+        process.env.PRIVATE_KEY,
+        { expiresIn: '60m' },
+      );
+      res.status(201).json({ message: 'User created successfully', jwt });
     } catch (error) {
       console.log(error.message);
       res.statusText = error.message;
@@ -38,7 +44,7 @@ const userController = {
       if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
       }
-      
+
       const doesUserAlreadyExist = await UserModel.findOne({
         email: req.body.email,
       });

@@ -28,8 +28,7 @@ const analysisSchema = new Schema({
     required: true,
   },
   created_by: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true,
   },
 });
