@@ -4,6 +4,7 @@ const { User: UserModel, User } = require('../models/User');
 const { Analysis } = require('../models/Analysis');
 const { formatDate } = require('../utils/format-date.util');
 const { Animal: AnimalModel, Animal } = require('../models/Animal');
+const { getRiskLabel } = require('../utils/get-risk-label.util');
 
 const farmController = {
   create: async (req, res) => {
@@ -120,12 +121,79 @@ const farmController = {
             result: analysis.disease_class,
             risk: analysis.accuracy,
             status: analysis.treatment_status,
+            analysisImg: undefined,
           };
         }),
       );
       res
         .status(200)
         .json(buildGetAllAnimalsFarmResDto.filter((animal) => animal));
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+  getFarmDetailedStatistics: async (req, res) => {
+    try {
+      const ownerId = req.headers.userId;
+      const resFarm = await FarmModel.findOne({ owner_id: ownerId });
+      const getAllFarmEmployees = await UserModel.find({
+        farm_id: resFarm._id.toString(),
+      });
+      const allAnalysisMadeByEmployees = await Analysis.find({
+        created_by: {
+          $in: getAllFarmEmployees.map((employee) => employee._id.toString()),
+        },
+      });
+      const groupAnalysisByAnimal = allAnalysisMadeByEmployees.reduce(
+        (acc, analysis) => {
+          if (!acc[analysis.animal_id]) {
+            acc[analysis.animal_id] = [];
+          }
+          acc[analysis.animal_id].push(analysis);
+          return acc;
+        },
+        {},
+      );
+      const getMostRecentAnalysisByAnimal = Object.keys(
+        groupAnalysisByAnimal,
+      ).map((animalId) => {
+        const analysisList = groupAnalysisByAnimal[animalId];
+        const mostRecentAnalysis = analysisList.reduce((acc, analysis) => {
+          if (!acc) {
+            return analysis;
+          }
+          return acc.created_at > analysis.created_at ? acc : analysis;
+        }, null);
+        return mostRecentAnalysis;
+      });
+      const buildFarmDetailedStatisticsResDto = await Promise.all(
+        getMostRecentAnalysisByAnimal.map(async (analysis) => {
+          const animal = await AnimalModel.findById(analysis.animal_id);
+          if (!animal) return null;
+          const responsibleEmployee = getAllFarmEmployees.find(
+            (employee) => employee._id.toString() === analysis.created_by,
+          );
+          return {
+            id: animal._id.toString(),
+            animalId: animal.number_identification,
+            animalName: animal?.name,
+            animalPhoto: animal?.image,
+            date: formatDate(analysis.created_at),
+            result: analysis.disease_class,
+            risk: analysis.accuracy,
+            status: analysis.treatment_status,
+            analysisImg: undefined,
+            riskLabel: getRiskLabel(analysis.accuracy),
+            analysisId: analysis._id.toString(),
+            authorName: responsibleEmployee.name,
+            authorPhoto: undefined,
+            diagnosisDate: formatDate(analysis.created_at),
+          };
+        }),
+      );
+      res
+        .status(200)
+        .json(buildFarmDetailedStatisticsResDto.filter((animal) => animal));
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
     }

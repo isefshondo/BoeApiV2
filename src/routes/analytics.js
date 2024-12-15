@@ -9,10 +9,5 @@ router.post(
   tokenValidated,
   analyticsController.getAnalyticsGraphics,
 );
-router.get(
-  '/detailed-analytics',
-  tokenValidated,
-  analyticsController.getDetailedAnalytics,
-);
 
 module.exports = router;

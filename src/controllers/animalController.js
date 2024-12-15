@@ -38,30 +38,35 @@ const animalController = {
   },
   getAll: async (req, res) => {
     try {
-      let allRegisteredCows = [];
       const userId = req.headers.userId;
 
       const allRegisteredCowByUserId = await AnimalModel.find({
         user_id: userId,
       });
 
-      for (let i = 0; i < allRegisteredCowByUserId.length; i++) {
-        const analysisHistoric = await AnalysisModel.find({
-          animal_id: allRegisteredCowByUserId[i]._id,
-        });
-        const lastAnalysis = analysisHistoric.reduce((mostRecent, current) => {
-          return new Date(mostRecent.created_at) > new Date(current.created_at)
-            ? mostRecent
-            : current;
-        }, analysisHistoric[0]);
+      const allRegisteredAnimals = await Promise.all(
+        allRegisteredCowByUserId.map(async (animal) => {
+          const analysisHistoric = await AnalysisModel.find({
+            animal_id: animal._id,
+          });
+          const lastAnalysis = analysisHistoric.reduce(
+            (mostRecent, current) => {
+              return new Date(mostRecent.created_at) >
+                new Date(current.created_at)
+                ? mostRecent
+                : current;
+            },
+            analysisHistoric[0],
+          );
 
-        allRegisteredCows.push({
-          animal: allRegisteredCowByUserId[i],
-          lastAnalysis,
-        });
-      }
+          return {
+            animal,
+            lastAnalysis,
+          };
+        }),
+      );
 
-      res.status(200).json(allRegisteredCows);
+      res.status(200).json(allRegisteredAnimals);
     } catch (error) {
       console.log(error);
       res.statusText = error.message;
